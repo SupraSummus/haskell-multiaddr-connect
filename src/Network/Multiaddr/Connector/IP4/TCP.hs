@@ -18,17 +18,17 @@ import Network.Socket (
 import Network.Socket.ByteString (send, recv)
 import Control.Concurrent (forkIO)
 
-connect :: Connector
+connect :: Connector IO
 connect multipath
     | Prelude.length multipath >= 4 = connect4 multipath
     | otherwise = Nothing
 
-connect4 :: Connector
+connect4 :: Connector IO
 connect4 (ipproto:addr:proto:port:encapsulated)
     | (ipproto == "ip4") && (proto == "tcp") = Just (encapsulated, connectTCP addr port)
     | otherwise = Nothing
 
-connectTCP :: String -> String -> Connection
+connectTCP :: String -> String -> Connection IO
 connectTCP addrStr portStr dataOut handler = do
     addr <- inet_addr addrStr
     port <- maybe (error $ "invalid port " ++ portStr) (return . fst) (listToMaybe $ reads portStr)
@@ -36,7 +36,7 @@ connectTCP addrStr portStr dataOut handler = do
     Network.Socket.connect sock $ SockAddrInet port addr
     communicate sock dataOut handler
 
-communicate :: Socket -> Connection
+communicate :: Socket -> Connection IO
 communicate sock dataSource recvHandler = do
     forkIO $ sendManyIO sock dataSource
     recvMany sock recvHandler

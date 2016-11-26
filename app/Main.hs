@@ -25,5 +25,5 @@ main = do
             exitFailure
 
 
-getConnection :: Multipath -> IO (Connection)
+getConnection :: Multipath -> IO (Connection IO)
 getConnection addr = maybe (ioError $ userError $ "no connector for addr " ++ show addr) (return . snd) (connect addr)
